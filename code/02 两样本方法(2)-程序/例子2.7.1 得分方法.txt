@@ -1,0 +1,38 @@
+###############  Exponential score  ################
+
+expsc<-function(x)
+{
+  y=rank(x)
+  n=length(x)
+  sc=rep(0, n)
+  for(i in 1:n)
+  {
+    for(j in 1:y[i])
+    { sc[i] =  sc[i]+1/(n+1-j) }
+  }
+  sc
+}
+
+####################################################
+x=c(33.63, 39.86, 69.32, 42.13, 58.36, 74.11)
+y=c(26.15, 18.56, 17.55,  9.84, 28.29, 34.15)
+alpha=0.05; n1=length(x); n2=length(y); n=n1+n2
+data  <- c(x, y)
+index <- c(rep(1,n1),rep(2,n2)) 
+#score= qnorm( rank(data)/(n+1))     ### Van der Waerden 得分
+score = expsc(data)                  ### 指数得分
+Dobs  = sum(score[index==1]) 
+permu = combn(n, n1)
+N = dim(permu)[2]
+z = rep(1, N)
+for(i in 1:N)
+{
+  ind  = permu[,i]
+  z[i] =  sum(score[ind])  
+}
+p.value <- length(z[z>=Dobs])/N
+print(p.value)
+
+
+
+ 

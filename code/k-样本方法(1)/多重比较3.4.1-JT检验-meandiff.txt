@@ -1,0 +1,41 @@
+ 
+###  对于全部数据，x， 计算JT统计量， Tij取为均值之差
+jt<-function(x, group)
+{ ug=unique(group)
+  k=length(ug)
+  jt=0
+  for(j in 1:(k-1))
+  { for(i in (j+1):k)
+     { xa=  x[group==ug[i]]
+       xb=  x[group==ug[j]]      
+       jt=jt+ mean(xa) - mean(xb)
+#      print(c(i,j,tmp))
+      }   
+  }
+  jt
+}
+
+##################       数据      ##########################################
+x1=c( 13.0, 24.1, 11.7, 16.3, 15.5, 24.5)
+x2=c( 42.0, 18.0, 14.0, 36.0, 11.6, 19.0)
+x3=c( 15.6, 23.8, 24.4, 24.0, 21.0, 21.1)
+x4=c( 35.3, 22.5, 16.9, 25.0, 23.1, 26.0)
+
+x <- c(x1, x2, x3, x4)
+ind=c(rep(1,length(x1)), rep(2, length(x2)), rep(3, length(x3)), rep(4, length(x4)))
+group=as.factor(ind)
+   
+##################  基于JT统计量的随机置换检验     ########################################
+JTobs = jt(x,group)
+rep=4000
+results <- replicate(rep, jt(sample(x), group))
+pv.permu <- length(results[results>=JTobs])/rep
+cat('\n P-value based on permutation is ',pv.permu, '\n') 
+ 
+##################  Kruskal-Wallis检验     ########################################
+out=kruskal.test(x~group)
+pv.kw=out$p.value
+cat('\n P-value of Kruskal-Wallis test is ',pv.kw, '\n') 
+
+
+

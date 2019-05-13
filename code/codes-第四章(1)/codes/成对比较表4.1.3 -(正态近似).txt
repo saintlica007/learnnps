@@ -1,0 +1,33 @@
+
+######  计算一组置换样本对应的统计量  ###################################
+ppmr<-function(x)    ###  paired permutation
+{ ind=rbinom(length(x), 1, 0.5)
+  ind=(ind-0.5)*2
+  mean(x*ind) 
+ }
+
+###########  数据   ######################################################
+x1=c(74, 55, 61, 41, 53, 74, 52, 31, 50, 58, 54, 53, 69, 60, 61, 54, 57)
+x2=c(63, 58, 49, 47, 50, 69, 67, 40, 44, 38, 56, 38, 47, 41, 46, 47, 44)
+ 
+x <- x1-x2
+Obs=mean(x)
+ 
+
+####  随机置换检验     ################################################### 
+rep=4000
+results <- replicate(rep, ppmr(x))
+# p.value <- length(results[results>=Obs])/rep      ###单边检验
+p.value <- length(results[abs(results)>=Obs])/rep   ###双边检验
+print(p.value)
+
+n=length(x)
+VD = mean(x^2)/n
+p1=2-2*pnorm(abs(Obs)/sqrt(VD))
+
+
+ObsS = sum(x[x>0]) 
+ES= sum(abs(x))/2
+VS=sum(x^2)/4
+p2 = 2-2*pnorm(abs(ObsS-ES)/sqrt(VS))
+print(c(p1,p2, p.value))

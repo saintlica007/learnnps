@@ -1,0 +1,25 @@
+x=c(16.55, 15.36, 15.94, 16.43, 16.01)
+y=c(16.05, 15.98, 16.10, 15.88, 15.91) 
+###  要检验H0: x的方差等于 y的方差， H1: x的方差大于 y的方差
+alpha=0.05; n1=length(x); n2=length(y); n=n1+n2
+dev_x=abs(x-median(x)); dev_y=abs(y-median(y))
+
+data  <- c(dev_x, dev_y); index <- c(rep(1,n1),rep(2,n2))  
+permu = combn(n, n1); N = dim(permu)[2]; z = rep(1, N)
+for(i in 1:N)
+{ ind  = permu[,i]
+  z[i] =  mean(data[ind]) /mean(data[-ind])
+}
+ 
+RMD_obs =  mean(dev_x)/mean(dev_y)
+cat('\n RMD_obs=', RMD_obs, '\n')
+p.value <- length(z[z>=RMD_obs])/N
+print(p.value) 
+
+prob=c(90, 95, 97.5)/100
+quan=quantile(z, prob)
+cat('\n Quantiles at 90%, 95% and 97.5% are ', quan, '\n')
+###  书上是基于1000次随机抽样得到的分位数，
+###  这里是利用完全置换样本（共252个），所以结果有些差异。
+
+ 

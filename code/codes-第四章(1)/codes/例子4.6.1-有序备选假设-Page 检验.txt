@@ -1,0 +1,84 @@
+######  计算一组置换样本对应的统计量  ######################
+permf<-function(x, group)    ###  permution sample
+{ ug=unique(group)
+  k=length(ug) 
+  y=x
+  for(i in 1: k)
+  { y[group==ug[i]] = sample(x[group==ug[i]]) }
+  y
+}
+
+PG<-function(x, groupb, groupt)
+{
+  pg=0
+  ugt=unique(groupt)
+  k=length(ugt)
+  for(i in 1:k)
+  { xi = x[groupt == ugt[i]]
+    pg=pg+ sum(xi)*i
+   }
+  pg 
+}
+
+ 
+
+###########  数据   ######################################################
+ 
+x1=c(120, 207, 122, 128)
+x2=c(208, 188, 137, 128)
+x3=c(199, 181, 177, 160)
+x4=c(194, 164, 177, 142)
+x5=c(177, 155, 160, 157)
+x6=c(195, 175, 138, 179)
+rx1=rank(x1)
+rx2=rank(x2)
+rx3=rank(x3)
+rx4=rank(x4)
+rx5=rank(x5)
+rx6=rank(x6)
+x <- c(rx1,rx2,rx3,rx4,rx5,rx6)
+b=6; k=4
+
+
+
+#x1=c(100, 100, 150, 150)
+#x2=c(80, 80, 80, 90)
+#x3=c(50, 60, 80, 90)
+#x1=rank(x1)
+#x2=rank(x2)
+#x3=rank(x3)
+#x=c(x1,x2,x3)
+#b=3; k=4
+ 
+indb=rep(1:b, rep(k,b))          ## 区组的标记 
+indt=rep(1:k, b)                 ## 处理的标记
+groupb=as.factor(indb)
+groupt=as.factor(indt)
+
+obs=PG(x,groupb,groupt)
+
+###########   置换方法  ############################
+rep=5000
+results <- replicate(rep, PG(permf(x,groupb),groupb, groupt))
+pv1 <- length(results[results<=obs])/rep   
+print(pv1)
+cat('P-value from the perumtation distribution is ', pv1, '\n')
+
+
+#### 大样本近似   ##############
+
+epg=b*k*(k+1)^2/4
+
+sigma=0
+ugb=unique(groupb)
+for(i in 1:b)
+{ xi = x[groupb == ugb[i]]
+  sigma=sigma + var(xi)
+}
+
+vpg= (k-1)*k*(k+1)/(12)
+vpg=vpg*sigma
+
+z=(obs-epg)/sqrt(vpg)
+pv2 = pnorm(z)
+print(pv2)

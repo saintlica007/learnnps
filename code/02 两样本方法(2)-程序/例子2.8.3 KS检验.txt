@@ -1,0 +1,25 @@
+x=c(16.55, 15.36, 15.94, 16.43, 16.01)
+y=c(16.05, 15.98, 16.10, 15.88, 15.91)
+n1=length(x); n2=length(y) 
+data  <- c(x, y)
+index <- c(rep(0,n1),rep(1,n2)) 
+
+KS <- function(data, index)
+{
+  x=data[index==0]
+  y=data[index==1]
+  F1=ecdf(x)
+  F2=ecdf(y)
+  diff=abs(F1(data)-F2(data))
+  max(diff)
+ }
+Dobs = KS(data,index)
+results <- replicate(5000, KS(sample(data), index))
+p.value <- length(results[results>=Dobs])/5000
+cat('The resulting p-value is', p.value, '\n')
+
+
+####################################################
+
+plot(ecdf(x), col='blue', main='Display of two empirical distributions')
+lines(ecdf(y), col='red')

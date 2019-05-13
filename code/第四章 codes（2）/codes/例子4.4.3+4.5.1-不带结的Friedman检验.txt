@@ -1,0 +1,48 @@
+######  计算一组置换样本对应的统计量  ######################
+permf<-function(x, group)    ###  permution sample
+{ ug=unique(group)
+  k=length(ug) 
+  y=x
+  for(i in 1: k)
+  { y[group==ug[i]] = sample(x[group==ug[i]]) }
+  y
+}
+
+stat<-function(x,group)
+{
+  ssx=0
+  ug=unique(group)
+  k=length(ug)
+  for(i in 1:k)
+  { mx=mean(x[group == ug[i]])
+    ssx=ssx+ mx*mx
+   }
+  ssx
+}
+
+ 
+
+###########  数据   ######################################################
+ 
+x1=c(120, 207, 122, 128)
+x2=c(208, 188, 137, 128)
+x3=c(199, 181, 177, 160)
+x4=c(194, 164, 177, 142)
+x5=c(177, 155, 160, 157)
+x6=c(195, 175, 138, 179)
+
+#x <- c( x1,  x2, x3, x4, x5, x6)
+x <- c(rank(x1), rank(x2), rank(x3), rank(x4), rank(x5), rank(x6))
+
+indb=rep(1:6, rep(4,6))          ## 区组的标记 
+indt=rep(1:4, 6)                 ## 处理的标记
+groupb=as.factor(indb)
+groupt=as.factor(indt)
+
+obs=stat(x,groupt)
+rep=5000
+results <- replicate(rep, stat(permf(x,groupb),groupt))
+p.value <- length(results[results>=obs])/rep   
+print(p.value)
+
+ 

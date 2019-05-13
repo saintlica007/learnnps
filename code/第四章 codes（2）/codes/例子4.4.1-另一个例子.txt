@@ -1,0 +1,48 @@
+
+######  计算一组置换样本对应的统计量  ###################################
+permf<-function(x, group)    ###  permution sample
+{ ug=unique(group)
+  k=length(ug) 
+  y=x
+  for(i in 1: k)
+  { y[group==ug[i]] = sample(x[group==ug[i]]) }
+  y
+}
+
+stat<-function(x,group)
+{
+  ssx=0
+  ug=unique(group)
+  k=length(ug)
+  for(i in 1:k)
+  { mx=mean(x[group == ug[i]])
+    ssx=ssx+ mx*mx
+   }
+  ssx
+}
+
+###########  数据   ################################################## 
+ 
+x1=c(3,3,5,5)
+x2=c(-1,-2,2,2)
+x3=c(3,4,4,7)
+x4=c(1,2,3,5)
+x5=c(-3,-1,-2,2)
+
+x <- c(x1, x2, x3, x4,x5)
+indb=rep(1:5, rep(4,5))         
+indt=rep(1:4, 5)               
+groupb=as.factor(indb)
+groupt=as.factor(indt)
+
+obs=stat(x,groupt)
+
+####  随机置换检验 的p值   ############################################## 
+rep=5000
+results <- replicate(rep, stat(permf(x,groupb),groupt))
+p.value <- length(results[results>=obs])/rep   
+print(p.value)
+
+#####  两因素方差分析的分析结果
+anova(lm(x~groupb+groupt))
+anova(lm(x~groupt))

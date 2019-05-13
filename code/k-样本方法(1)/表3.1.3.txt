@@ -1,0 +1,31 @@
+start.time=proc.time()    #### record the beginning time
+
+x1=c( 6.08, 22.29,  7.51, 34.36, 23.68)
+x2=c(30.45, 22.71, 44.52, 31.47, 36.81)
+x3=c(32.04, 28.03, 32.74, 23.84, 29.64)
+
+K=10000
+x  <- c(x1, x2, x3)
+ind=c(rep(1,length(x1)), rep(2, length(x2)), rep(3, length(x3)))
+group=as.factor(ind)
+Ftest <- function(x, group)
+{ obj=lm(x~group)
+  result=anova(obj)
+  result$F[1] 
+ }
+
+Dobs = Ftest(x,group)
+results <- replicate(K, Ftest(sample(x), group))
+p.value <- length(results[results>Dobs])/K
+
+prob=c(80, 85, 90, 95, 97.5, 99)/100
+qperm=quantile(results, prob)
+qf = qf(prob, 2, length(x)-3)
+quan=rbind(qperm, qf)
+print(quan)
+
+
+####以下代码 输出程序所用的时间
+end.time=proc.time()
+total.cputime=end.time-start.time
+total.cputime

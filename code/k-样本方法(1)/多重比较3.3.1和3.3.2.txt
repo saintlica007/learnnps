@@ -1,0 +1,161 @@
+
+#################################################################################
+####################  第一部分：定义一些必要的函数   ############################
+#################################################################################
+
+###  指数得分
+expsc<-function(x)
+{ y=rank(x)
+  n=length(x)
+  sc=rep(0, n)
+  for(i in 1:n)
+  {
+    for(j in 1:y[i])
+    { sc[i] =  sc[i]+1/(n+1-j) }
+  }
+  sc
+}
+
+### Van der Waerden 得分
+VDW<-function(x){ qnorm( rank(x)/(length(x)+1))   }
+
+##  多重比较
+MultComp<-function(x,group, alpha, index)
+{ obj=anova(aov(x~group))
+  mse.all=obj$Mean
+  mse=mse.all[length(mse.all)]
+
+  ug=unique(group)
+  m = length(ug)  
+  n=length(x)  
+  df=n-m 
+  
+  mse.rank=n*(n+1)/12
+
+  k=choose(m,2) 
+if(index==1) 
+{ cc=qt(1-alpha/(2*k), df)*sqrt(mse)    ## Bonferroni, original data
+  method= 'Bonferroni method based on original data' 
+}
+if(index==2) 
+{ mse=mse.rank
+  cc=qnorm(1-alpha/(2*k))*sqrt(mse)     ## Bonferroni, rank
+  method= 'Bonferroni method based on  data rank' 
+}
+if(index==3)
+{ cc=qt(1-alpha/2, df)*sqrt(mse)        ## Fisher's LSD, original data
+  method="Fisher's LSD method based on original data" 
+}
+if(index==4) 
+{ mse=mse.rank
+  cc=qnorm(1-alpha/2)*sqrt(mse)         ## Fisher's LSD, rank
+  method= "Fisher's LSD method based on  data rank" 
+}
+  nam=NULL
+  diff=NULL
+  crit=NULL
+  Pv = NULL
+
+# print(c(N,cc))
+
+  for (j in 1:(m-1))
+   {
+    for(i in (j+1):m)
+    {
+      nm=paste(as.character(i), '-', as.character(j),  '== 0  ')
+      nam=c(nam, nm)
+      xa=x[group==ug[i]]
+      xb=x[group==ug[j]]
+      dif=mean(xa) - mean(xb)
+      diff=c(diff, dif)
+      co=sqrt(1/length(xa)+1/length(xb) ) 
+      crit=c(crit, co*cc)
+      
+      p =  dif/(co*sqrt(mse)) 
+      Pv=c(Pv, p)
+     }
+    } 
+
+  if(index==1|index==3) { Pv = 2 - 2*pt(abs(Pv), df) }
+  if(index==2|index==4) { Pv = 2 - 2*pnorm(abs(Pv)) }
+   
+   diff=round(diff,6)
+   crit=round(crit,6)
+   Pv=round(Pv, 6)
+   temp=data.frame(TreatmentPair=nam, diff=diff, crit=crit, Pvalue=Pv)
+   list(method=method, results=temp)
+}
+
+
+#################################################################################
+####################    第二部分：例子3.3.1的分析    ############################
+#################################################################################
+
+library(multcomp)   ## 这个软件包需要安装一下
+x1=c( 26.5, 15.0, 18.2, 19.5, 23.1, 17.3)
+x2=c( 16.5, 15.8, 14.1, 30.2, 25.1, 17.4)
+x3=c( 19.2, 21.4, 26.0, 21.6, 35.0, 28.9)
+x4=c( 26.7, 37.3, 28.0, 30.1, 33.5, 26.3)
+
+x <- c(x1, x2, x3, x4)
+ind=c(rep(1,length(x1)), rep(2, length(x2)), rep(3, length(x3)), rep(4, length(x4)))
+group=as.factor(ind) 
+
+################################################################################
+###   Multiple comparison based on original data 
+alpha=0.05
+MultComp(x, group,alpha, 1)
+MultComp(x, group,alpha, 3)
+obj1=lm(x~group)  ## names(obj1)
+mobj1=glht(obj1, linfct=mcp(group="Tukey"))
+summary(mobj1)
+
+################################################################################
+###   Multiple comparison based on data rank 
+y=rank(x)
+MultComp(y, group,alpha, 2)
+MultComp(y, group,alpha, 4)
+obj2=lm(y~group)  ## names(obj2)
+mobj2=glht(obj2, linfct=mcp(group="Tukey"))
+summary(mobj2)
+################################################################################
+### 另一种 实现Tukey HSD检验的R命令
+ obj2=aov(x~group)
+ TukeyHSD(obj2, which='group')
+ obj3=aov(y~group)
+ TukeyHSD(obj3, which='group')
+################################################################################
+
+
+#################################################################################
+####################    第三部分：例子3.3.2的分析    ############################
+#################################################################################
+
+x1=c( 16, 19.5, 12.5, 16, 19.5, 19.5, 8)
+x2=c( 12.5, 16, 19.5, 8, 12.5, 3, 3, 8)
+x3=c( 8, 3, 3, 8, 3, 12.5) 
+
+x <- c(x1, x2, x3)
+ind=c(rep(1,length(x1)), rep(2, length(x2)), rep(3, length(x3)))
+group=as.factor(ind)
+
+alpha=0.05
+y <- rank(x)
+MultComp(x, group,alpha, 1)
+MultComp(x, group,alpha, 3)
+obj1=lm(x~group)  ## names(obj1)
+mobj1=glht(obj1, linfct=mcp(group="Tukey"))
+summary(mobj1)
+obj11=aov(x~group)
+TukeyHSD(obj11, which='group')
+
+
+MultComp(y, group,alpha, 2)
+MultComp(y, group,alpha, 4)
+obj2=lm(y~group)  ## names(obj2)
+mobj2=glht(obj2, linfct=mcp(group="Tukey"))
+summary(mobj2)
+
+obj22=aov(y~group)
+TukeyHSD(obj22, which='group')
+

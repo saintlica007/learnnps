@@ -1,0 +1,46 @@
+
+expsc<-function(x)
+{
+  y=rank(x)
+  n=length(x)
+  sc=rep(0, n)
+  for(i in 1:n)
+  {
+    for(j in 1:y[i])
+    { sc[i] =  sc[i]+1/(n+1-j) }
+  }
+  sc
+}
+
+###################################################################
+start.time=proc.time()    #### record the beginning time
+
+x1=c(4,5,3,4,5,5,2); x2=c(3,4,5,2,3,1,1,2); x3=c(2,1,1,2,1,3)
+xdat<- c(x1, x2, x3); 
+#x=rank(xdat)
+#x=qnorm(rank(xdat)/(length(xdat)+1))    ## 基于得分的检验
+x=expsc(xdat)     ## 基于指数得分的检验
+
+ind=c(rep(1,length(x1)), rep(2, length(x2)), rep(3, length(x3)))
+group=as.factor(ind)
+kw <- function(x, group)
+{  
+  ug=unique(group)
+  tmp=0; mx=mean(x)
+  for( i in 1:length(ug))
+  { xi=x[group==ug[i]]
+    tmp=tmp+length(xi)*(mean(xi)-mx)^2
+   }
+  tmp/var(x)
+ }
+
+K=4000; Dobs = kw(x,group)
+results <- replicate(K, kw(sample(x), group))
+p.value1 <- length(results[results>Dobs])/K
+p.value2 <- 1-pchisq(Dobs, 2)
+print(c(p.value1, p.value2))
+
+hist(results, breaks=20,prob=TRUE)
+
+
+kruskal.test(x,group)

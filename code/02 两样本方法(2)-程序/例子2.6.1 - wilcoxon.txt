@@ -1,0 +1,4 @@
+x=c( 3.6,   3.9,   4.0,    4.3)
+y=c( 3.8,   4.1,   4.5,    4.8)
+wilcox.test(y,x,alternative='greater')
+

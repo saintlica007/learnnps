@@ -1,0 +1,5 @@
+x=seq(from=-8, to=8, by=0.05)
+y1=dnorm(x)
+y2=dnorm(x,0, 2)
+plot(x,y1, type='l', ylab='', main='Density functions with different scales')
+lines(x,y2, col='red')

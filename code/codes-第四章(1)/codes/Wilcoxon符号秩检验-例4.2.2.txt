@@ -1,0 +1,57 @@
+###  把一个整数x转化成k位 2进制的数  ###################################
+binary<-function(x, k)
+{ tmp=NULL
+  y=x
+  if(x<2^k) 
+  { for(i in k-1:k)
+    { a = floor(y/2^i)
+#     print(c(i, a))
+      tmp=c(tmp, a)
+      y = y-a*2^i
+     }
+   }
+   2*(tmp-0.5)
+}
+ 
+######  全部置换样本对应的统计量  ###################################
+ppm<-function(x)  ###  paired permutation
+{ k=length(x) 
+  ppm=NULL
+  N=2^k-1
+  for(i in 0:N) ppm=c(ppm, mean(x*binary(i, k)))
+  ppm
+}
+
+######  计算一组置换样本对应的统计量  ###################################
+ppmr<-function(x)    ###  paired permutation
+{ ind=rbinom(length(x), 1, 0.5)
+  ind=(ind-0.5)*2
+  mean(x*ind) 
+ }
+ 
+x1=c(1530, 2130,2940,1960,2270)
+x2=c(1290, 2250,2430,1900,2120)
+x=x1-x2
+####  全部置换检验     ################################################### 
+
+x=rank(abs(x))*sign(x)
+Obs=mean(x)
+results=ppm(x)
+pv1=sum(results>=Obs)/length(results)
+ 
+
+   
+####  随机置换检验     ################################################### 
+rep=4000
+results <- replicate(rep, ppmr(x))
+pv2 <- length(results[results>=Obs])/rep
+ 
+
+
+####  渐近正态分布做参照分布     ################################################### 
+n=length(x)
+ESR = n*(n+1)/4
+VSR = ESR*(2*n+1)/6
+SR = sum(x[x>0])-0.5        ### 用到了连续性修正
+pv3=1-pnorm((SR-ESR)/sqrt(VSR))
+print(c(pv1, pv2, pv3))

@@ -1,0 +1,35 @@
+x=c( 33.63, 39.86, 69.32, 42.13, 58.36, 74.11)
+y=c( 26.15, 18.56, 17.55, 9.84, 28.29, 34.15)
+alpha=0.05
+m=length(x)
+n=length(y)
+diff=rep(1, n*m)
+for (i in 1: m)
+{
+  for(j in 1: n)
+  { 
+    k = (i-1)*n+j    
+    diff[k] = x[i]-y[j]
+   }
+}
+
+diff=sort(diff)
+mu=n*m/2                    ### 到后面第2.10节讲解
+va=mu*(n+m+1)/6             ###  
+z=qnorm(1-alpha/2)
+ka =  mu - z*sqrt(va) 
+kb =  mu + z*sqrt(va) + 1 
+
+ka=round(ka)    ## 四舍五入
+kb=round(kb)
+print(c(diff[ka], diff[kb]))  
+print(median(diff))
+
+#########################################################
+### 基于两样本t统计量构造置信区间
+x=c( 33.63, 39.86, 69.32, 42.13, 58.36, 74.11)
+y=c( 26.15, 18.56, 17.55, 9.84, 28.29, 34.15)
+
+t.test(x, y, var.equal=TRUE, conf.level=0.9)
+
+ 
